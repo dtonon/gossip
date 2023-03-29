@@ -2,14 +2,16 @@ use super::{GossipUi, NoteData, Page, RepostType};
 use crate::feed::FeedKind;
 use crate::globals::GLOBALS;
 use eframe::egui;
-use egui::{RichText, Ui};
+use egui::{Context, RichText, Ui};
 use linkify::{LinkFinder, LinkKind};
 use nostr_types::{IdHex, Tag};
+use regex::Regex;
 
 /// returns None or a repost
 pub(super) fn render_content(
     app: &mut GossipUi,
     ui: &mut Ui,
+    ctx: &Context,
     note: &NoteData,
     as_deleted: bool,
     content: &str,
@@ -19,7 +21,6 @@ pub(super) fn render_content(
 
     // Optional repost return
     let mut append_repost: Option<NoteData> = None;
-
     for span in LinkFinder::new().kinds(&[LinkKind::Url]).spans(content) {
         if span.kind().is_some() {
             if span.as_str().ends_with(".jpg")
@@ -67,12 +68,18 @@ pub(super) fn render_content(
                                             if *i == num {
                                                 // FIXME is there a way to consume just this entry in cached_mentions so
                                                 //       we can avoid the clone?
+
+                                                // The mention is on a new line
+                                                let re = Regex::new(r"\n\s*$").unwrap();
+                                                if !re.is_match(&s[pos..mat.start()]) {
+                                                    continue;
+                                                }
                                                 if let Some(note_data) = super::NoteData::new(
                                                     event.clone(),
                                                     true,
                                                     app.settings.show_long_form,
                                                 ) {
-                                                    append_repost = Some(note_data);
+                                                    super::render_repost(app, ui, ctx, &note, note_data);
                                                     render_link = false;
                                                 }
                                             }

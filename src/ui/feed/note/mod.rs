@@ -105,17 +105,8 @@ impl NoteData {
                 } else {
                     None
                 }
-            } else if with_inline_mentions
-                && content_trim_len > 4
-                && content_trim.chars().nth(content_trim_len - 1).unwrap() == ']'
-                && content_trim.chars().nth(content_trim_len - 3).unwrap() == '['
-                && content_trim.chars().nth(content_trim_len - 4).unwrap() == '#'
-                && !cached_mentions.is_empty()
-            {
-                // matches content that ends with a mention, avoiding use of a regex match
-                Some(RepostType::CommentMention)
             } else {
-                None
+                Some(RepostType::CommentMention)
             }
         };
 
@@ -604,6 +595,7 @@ fn render_note_inner(
                                 append_repost = content::render_content(
                                     app,
                                     ui,
+                                    ctx,
                                     &note_data,
                                     deletion.is_some(),
                                     display_content,
@@ -616,6 +608,7 @@ fn render_note_inner(
                             append_repost = content::render_content(
                                 app,
                                 ui,
+                                ctx,
                                 &note_data,
                                 deletion.is_some(),
                                 display_content,
