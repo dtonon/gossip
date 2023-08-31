@@ -72,7 +72,7 @@ impl<'a> CoverageEntry<'a> {
         draw_text_at(
             ui,
             pos,
-            self.pk.as_bech32_string().into(),
+            npub_preview(self.pk.as_bech32_string()).into(),
             Align::RIGHT,
             None,
             None);
@@ -97,6 +97,12 @@ fn find_relays_for_pubkey(pk: &PublicKey) -> Vec<RelayUrl> {
         .filter(|f| f.pubkeys.contains(pk))
         .map(|f| f.relay_url.clone())
         .collect()
+}
+
+fn npub_preview(input_string: String) -> String {
+    let first_part = &input_string[..9];
+    let last_part = &input_string[59..];
+    format!("{}..{}", first_part, last_part)
 }
 
 pub(super) fn update(app: &mut GossipUi, _ctx: &Context, _frame: &mut eframe::Frame, ui: &mut Ui) {
